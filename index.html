@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review System</title>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    form { margin-bottom: 20px; }
+    .review { border-bottom: 1px solid #ccc; padding: 10px 0; }
+  </style>
+</head>
+<body>
+  <h1>Leave a Review</h1>
+  <form id="reviewForm">
+    <input type="text" id="name" placeholder="Your name" required>
+    <textarea id="review" placeholder="Your review" required></textarea>
+    <button type="submit">Submit</button>
+  </form>
+  <h2>Reviews</h2>
+  <div id="reviews"></div>
+
+  <script>
+    document.getElementById('reviewForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('name').value;
+      const review = document.getElementById('review').value;
+
+      const response = await fetch('http://localhost:3000/reviews', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name, review })
+      });
+
+      if (response.ok) {
+        document.getElementById('name').value = '';
+        document.getElementById('review').value = '';
+        loadReviews();
+      }
+    });
+
+    async function loadReviews() {
+      const response = await fetch('http://localhost:3000/reviews');
+      const reviews = await response.json();
+      const reviewsDiv = document.getElementById('reviews');
+      reviewsDiv.innerHTML = reviews.map(r => `
+        <div class="review">
+          <strong>${r.name}</strong>
+          <p>${r.review}</p>
+          <small>${new Date(r.date).toLocaleString()}</small>
+        </div>
+      `).join('');
+    }
+
+    loadReviews();
+  </script>
+</body>
+</html>
